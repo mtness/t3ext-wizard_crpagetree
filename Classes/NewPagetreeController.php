@@ -85,7 +85,7 @@ class NewPagetreeController
         $isV11 = class_exists(Typo3Version::class)
              && GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() >= 11;
         if ($isV11) {
-            $previewDataAttributes = \TYPO3\CMS\Backend\Routing\PreviewUriBuilderPreviewUriBuilder::create($pageUid)
+            $previewDataAttributes = \TYPO3\CMS\Backend\Routing\PreviewUriBuilder::create($pageUid)
                 ->withRootLine(BackendUtility::BEgetRootLine($pageUid))
                 ->buildDispatcherDataAttributes();
             $viewButton->setDataAttributes($previewDataAttributes ?? []);
