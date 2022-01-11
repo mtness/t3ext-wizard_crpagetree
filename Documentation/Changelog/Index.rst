@@ -6,6 +6,12 @@
 Change log
 ==========
 
+Version 5.0.3
+-------------
+
+* Fix v11 compatibility - Thanks to Susi Moog
+
+
 Version 5.0.2
 -------------
 
