@@ -24,6 +24,7 @@ use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
+use TYPO3\CMS\Recordlist\Browser\DatabaseBrowser;
 
 /**
  * "New page tree" controller
@@ -126,6 +127,7 @@ class NewPagetreeController
             // Display result:
             $tree = GeneralUtility::makeInstance(ElementBrowserPageTreeView::class);
             $tree->init(' AND pages.doktype < ' . PageRepository::DOKTYPE_RECYCLER . ' AND pages.hidden = "0"');
+            $tree->setLinkParameterProvider(GeneralUtility::makeInstance(DatabaseBrowser::class));
             $tree->thisScript = '#';
 
             $tree->getTree($pageUid);
