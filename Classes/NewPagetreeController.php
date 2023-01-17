@@ -2,7 +2,8 @@
 declare(strict_types=1);
 namespace MichielRoos\WizardCrpagetree;
 
-use PDO;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\PreviewUriBuilder;
@@ -10,6 +11,7 @@ use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Tree\View\ElementBrowserPageTreeView;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
@@ -45,6 +47,8 @@ class NewPagetreeController
      *
      * @param ServerRequestInterface $request
      * @return ResponseInterface Response
+     * @throws DBALException
+     * @throws Exception
      */
     public function mainAction(ServerRequestInterface $request): ResponseInterface
     {
@@ -152,7 +156,11 @@ class NewPagetreeController
         // Set first pid to "-1 * uid of last existing sub-page" if pages should be created at end
         $firstPid = $pageUid;
         if ($afterExisting) {
-            $subPages = $this->getSubPagesOfPage($pageUid);
+            try {
+                $subPages = $this->getSubPagesOfPage($pageUid);
+            } catch (DBALException|Exception) {
+                return false;
+            }
             $lastPage = end($subPages);
             if (isset($lastPage['uid']) && MathUtility::canBeInterpretedAsInteger($lastPage['uid'])) {
                 $firstPid = -(int)$lastPage['uid'];
@@ -240,6 +248,8 @@ class NewPagetreeController
      *
      * @param int $pageUid Get sub-pages from this pages
      * @return array
+     * @throws Exception
+     * @throws DBALException
      */
     protected function getSubPagesOfPage(int $pageUid): array
     {
@@ -250,11 +260,11 @@ class NewPagetreeController
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter($pageUid, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($pageUid, Connection::PARAM_INT)
                 ),
                 $queryBuilder->expr()->eq(
                     $GLOBALS['TCA']['pages']['ctrl']['languageField'],
-                    $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)
                 )
             )
             ->orderBy('sorting')
@@ -393,8 +403,7 @@ class NewPagetreeController
                 continue;
             }
             // Single line comment
-            if (preg_match('#^//#', ltrim($value)) || preg_match('/^#/', ltrim($value))
-            ) {
+            if (str_starts_with(ltrim($value), '//') || str_starts_with(ltrim($value), '#')) {
                 continue;
             }
 
@@ -417,20 +426,11 @@ class NewPagetreeController
     private function getIndentationChar(): string
     {
         $character = $this->request->getParsedBody()['indentationCharacter'];
-        switch ($character) {
-            case 'dot':
-                $character = '\.';
-                break;
-            case 'tab':
-                $character = '\t';
-                break;
-            case 'space':
-            default:
-                $character = ' ';
-                break;
-        }
-
-        return $character;
+        return match ($character) {
+            'dot' => '\.',
+            'tab' => '\t',
+            default => ' ',
+        };
     }
 
     /**
@@ -441,23 +441,12 @@ class NewPagetreeController
     private function getSeparationChar(): string
     {
         $character = $this->request->getParsedBody()['separationCharacter'];
-        switch ($character) {
-            case 'pipe':
-                $character = '|';
-                break;
-            case 'semicolon':
-                $character = ';';
-                break;
-            case 'colon':
-                $character = ':';
-                break;
-            case 'comma':
-            default:
-                $character = ',';
-                break;
-        }
-
-        return $character;
+        return match ($character) {
+            'pipe' => '|',
+            'semicolon' => ';',
+            'colon' => ':',
+            default => ',',
+        };
     }
 
     /**
