@@ -5,18 +5,18 @@ namespace MichielRoos\WizardCrpagetree;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Routing\PreviewUriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
-use TYPO3\CMS\Backend\Tree\View\BrowseTreeView;
 use TYPO3\CMS\Backend\Tree\View\ElementBrowserPageTreeView;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
-use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -31,17 +31,9 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
  */
 class NewPagetreeController
 {
-    /**
-     * @var ServerRequestInterface
-     */
-    protected $request;
+    protected ServerRequestInterface $request;
 
-    /**
-     * ModuleTemplate object
-     *
-     * @var ModuleTemplate
-     */
-    protected $moduleTemplate;
+    protected ModuleTemplate $moduleTemplate;
 
     public function __construct(ModuleTemplate $moduleTemplate = null)
     {
@@ -82,23 +74,11 @@ class NewPagetreeController
             ->setIcon($iconFactory->getIcon('actions-view-page', Icon::SIZE_SMALL))
             ->setHref('#');
 
-        $isV11 = class_exists(Typo3Version::class)
-             && GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() >= 11;
-        if ($isV11) {
-            $previewDataAttributes = \TYPO3\CMS\Backend\Routing\PreviewUriBuilder::create($pageUid)
-                ->withRootLine(BackendUtility::BEgetRootLine($pageUid))
-                ->buildDispatcherDataAttributes();
-            $viewButton->setDataAttributes($previewDataAttributes ?? []);
-        } else {
-            // @deprecated Using inline JavaScript is deprecated since TYPO3 v11.5 and will be removed in TYPO3 v12.0
-            $viewButton->setOnClick(
-                BackendUtility::viewOnClick($pageUid, '', BackendUtility::BEgetRootLine($pageUid))
-            );
-        }
-        $shortcutButton = $buttonBar->makeShortcutButton()
-            ->setModuleName('pagetree_new')
-            ->setGetVariables(['id']);
-        $buttonBar->addButton($cshButton)->addButton($viewButton)->addButton($shortcutButton);
+        $previewDataAttributes = PreviewUriBuilder::create($pageUid)
+            ->withRootLine(BackendUtility::BEgetRootLine($pageUid))
+            ->buildDispatcherDataAttributes();
+        $viewButton->setDataAttributes($previewDataAttributes ?? []);
+        $buttonBar->addButton($cshButton)->addButton($viewButton)->addButton($buttonBar->makeShortcutButton());
 
         // Main view setup
         /** @var StandaloneView $view */
@@ -140,19 +120,9 @@ class NewPagetreeController
             }
 
             // Display result:
-            if ($isV11) {
-                // todo check if this is correct at all
-                $tree = GeneralUtility::makeInstance(ElementBrowserPageTreeView::class);
-                $tree->init(' AND pages.doktype < 199 AND pages.hidden = "0"');
-                $tree->thisScript = '#';
-            } else {
-                /** @var BrowseTreeView $tree */
-                $tree = GeneralUtility::makeInstance(BrowseTreeView::class);
-                $tree->init(' AND pages.doktype < 199 AND pages.hidden = "0"');
-                $tree->thisScript = '#';
-                $tree->ext_IconMode = true;
-                $tree->expandAll = true;
-            }
+            $tree = GeneralUtility::makeInstance(ElementBrowserPageTreeView::class);
+            $tree->init(' AND pages.doktype < ' . PageRepository::DOKTYPE_RECYCLER . ' AND pages.hidden = "0"');
+            $tree->thisScript = '#';
 
             $tree->getTree($pageUid);
 
@@ -179,7 +149,7 @@ class NewPagetreeController
     {
         $pagesCreated = false;
 
-        // Set first pid to "-1 * uid of last existing sub page" if pages should be created at end
+        // Set first pid to "-1 * uid of last existing sub-page" if pages should be created at end
         $firstPid = $pageUid;
         if ($afterExisting) {
             $subPages = $this->getSubPagesOfPage($pageUid);
@@ -265,10 +235,10 @@ class NewPagetreeController
     }
 
     /**
-     * Get a list of sub pages with some all fields from given page.
+     * Get a list of sub-pages with some all fields from given page.
      * Fetch all data fields for full page icon display
      *
-     * @param int $pageUid Get sub pages from this pages
+     * @param int $pageUid Get sub-pages from this pages
      * @return array
      */
     protected function getSubPagesOfPage(int $pageUid): array
@@ -289,14 +259,14 @@ class NewPagetreeController
             )
             ->orderBy('sorting')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
 
     /**
      * Return the data as a compressed array
      *
-     * @param array $data : the uncompressed array
+     * @param array $data the uncompressed array
      *
      * @return   array      the data as a compressed array
      */
@@ -318,9 +288,9 @@ class NewPagetreeController
     /**
      * Return the data as a nested array
      *
-     * @param array $data : the data array
-     * @param int $oldLevel : the current level
-     * @param string $character : indentation character
+     * @param array $data the data array
+     * @param int $oldLevel the current level
+     * @param string $character indentation character
      *
      * @return   array      the data as a nested array
      */
@@ -338,8 +308,8 @@ class NewPagetreeController
 
                 if ($level > $oldLevel) {
                     /**
-                     * We have entered a sub level. Find the chunk of the array that
-                     * constitues this sub level. Pass this chunk to the getArray
+                     * We have entered a sublevel. Find the chunk of the array that
+                     * constitutes this sublevel. Pass this chunk to the getArray
                      * function. Then increase the $i to point to the point where the
                      * level is the same as we are on now.
                      */
@@ -377,7 +347,7 @@ class NewPagetreeController
     /**
      * Return the data with all the leaves sorted in reverse order
      *
-     * @param array $data : input array
+     * @param array $data input array
      *
      * @return   array      the data reversed
      */
@@ -401,7 +371,7 @@ class NewPagetreeController
     /**
      * Return the data without comment fields and empty lines
      *
-     * @param array $data : input array
+     * @param array $data input array
      *
      * @return   array      the data reversed
      */

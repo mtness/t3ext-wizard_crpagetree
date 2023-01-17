@@ -26,11 +26,8 @@ class BackendControllerHook
     {
         /** @var UriBuilder $uriBuilder */
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        $this->getPageRenderer()->addInlineSetting('WizardCrpagetree', 'wizardCrpagetreeUrl', (string)$uriBuilder->buildUriFromRoute('pagetree_new'));
-    }
-
-    protected function getPageRenderer(): PageRenderer
-    {
-        return GeneralUtility::makeInstance(PageRenderer::class);
+        $url = (string)$uriBuilder->buildUriFromRoute('pagetree_new');
+        GeneralUtility::makeInstance(PageRenderer::class)
+            ->addInlineSetting('WizardCrpagetree', 'wizardCrpagetreeUrl', $url);
     }
 }

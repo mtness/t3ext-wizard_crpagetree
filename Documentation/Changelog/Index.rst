@@ -6,6 +6,11 @@
 Change log
 ==========
 
+Version 6.0.0
+-------------
+
+* Drop support for TYPO3 v10
+
 Version 5.0.3
 -------------
 

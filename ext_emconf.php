@@ -4,7 +4,7 @@ $EM_CONF[$_EXTKEY] = [
     'title' => 'Web>Func, Wizards, Create page tree',
     'description' => 'Wizard that will create a page tree for you. Feed it with a space indented tree structure of the desired pages and the pages will be created for you.',
     'category' => 'module',
-    'version' => '5.0.3',
+    'version' => '6.0.0',
     'state' => 'stable',
     'uploadfolder' => 0,
     'author' => 'Michiel Roos',
@@ -12,7 +12,7 @@ $EM_CONF[$_EXTKEY] = [
     'author_company' => 'Michiel Roos',
     'constraints' => [
         'depends' => [
-            'typo3' => '10.4.21-11.5.99',
+            'typo3' => '11.5.21-12.1.99',
         ],
         'conflicts' => [],
         'suggests' => [],

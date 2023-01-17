@@ -21,9 +21,7 @@
 		"mass editing"
 	],
 	"require": {
-		"ext-pdo": "*",
-		"typo3/cms-core": "^10.4 | ^11.5",
-		"typo3/cms-backend": "^10.4 | ^11.5"
+		"typo3/cms-backend": "^11.5 | ^12.1"
 	},
 	"replace": {
 		"typo3-ter/wizard_crpagetree": "self.version"
@@ -38,7 +36,7 @@
 			"extension-key": "wizard_crpagetree"
 		},
 		"branch-alias": {
-			"dev-master": "5.0.x-dev"
+			"dev-master": "6.0.x-dev"
 		}
 	}
 }
