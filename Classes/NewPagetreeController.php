@@ -83,7 +83,6 @@ class NewPagetreeController
             ->withRootLine(BackendUtility::BEgetRootLine($pageUid))
             ->buildDispatcherDataAttributes();
         $viewButton->setDataAttributes($previewDataAttributes ?? []);
-        $buttonBar->addButton($cshButton)->addButton($viewButton)->addButton($buttonBar->makeShortcutButton());
 
         // Main view setup
         /** @var StandaloneView $view */
