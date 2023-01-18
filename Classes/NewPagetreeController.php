@@ -367,7 +367,7 @@ class NewPagetreeController
         $newData = [];
         $index = 0;
         foreach ($data as $chunk) {
-            if (is_array($chunk['data'])) {
+            if (is_array($chunk['data'] ?? false)) {
                 $newData[$index]['data'] = $this->reverseArray($chunk['data']);
                 krsort($newData[$index]['data']);
             }
