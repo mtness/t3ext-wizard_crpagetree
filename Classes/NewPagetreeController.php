@@ -286,10 +286,10 @@ class NewPagetreeController
     {
         $newData = [];
         foreach ($data as $value) {
-            if ($value['value']) {
+            if ($value['value'] ?? false) {
                 $newData[] = $value['value'];
             }
-            if ($value['data']) {
+            if ($value['data'] ?? false) {
                 $newData = array_merge($newData, $this->compressArray($value['data']));
             }
         }
