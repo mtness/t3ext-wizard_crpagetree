@@ -10,6 +10,8 @@ Version 6.0.0
 -------------
 
 * Drop support for TYPO3 v10
+* Require PHP 8.1+
+
 
 Version 5.0.3
 -------------
