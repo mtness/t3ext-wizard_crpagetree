@@ -11,10 +11,10 @@ This extension provides functionality to mass-create page(trees) in TYPO3.
 
 ## Version compatibility matrix
 
-| Extension  | TYPO3   | PHP       | Support / Development       |
-|------------|---------|-----------|-----------------------------|
-| dev-master | 11 - 12 | 8.1 - 8.2 | unstable development branch |
-| 5.x        | 10 - 11 | 7.4 - 8.2 | bugfixes, security updates  |
+| Extension        | TYPO3   | PHP       | Support / Development       |
+|------------------|---------|-----------|-----------------------------|
+| 6.x (dev-master) | 11 - 12 | 8.1 - 8.3 | unstable development branch |
+| 5.x              | 10 - 11 | 7.4 - 8.2 | bugfixes, security updates  |
 
 ## Thanks to our sponsors
 
