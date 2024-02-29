@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\PreviewUriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
+use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\Connection;
@@ -35,9 +36,13 @@ class NewPagetreeController
 
     protected ModuleTemplate $moduleTemplate;
 
-    public function __construct(ModuleTemplate $moduleTemplate = null)
+    protected IconFactory $iconFactory;
+    protected ModuleTemplateFactory $moduleTemplateFactory;
+
+    public function __construct(IconFactory $iconFactory, ModuleTemplateFactory $moduleTemplateFactory)
     {
-        $this->moduleTemplate = $moduleTemplate ?? GeneralUtility::makeInstance(ModuleTemplate::class);
+        $this->iconFactory = $iconFactory;
+        $this->moduleTemplateFactory = $moduleTemplateFactory;
     }
 
     /**
@@ -52,6 +57,7 @@ class NewPagetreeController
     {
         $this->request = $request;
 
+        $this->moduleTemplate = $this->moduleTemplateFactory->create($request);
         $backendUser = $this->getBackendUser();
         $pageUid = (int)$request->getQueryParams()['id'];
 
@@ -64,32 +70,29 @@ class NewPagetreeController
         }
 
         // Doc header handling
-        /** @var IconFactory $iconFactory */
-        $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
         $this->moduleTemplate->getDocHeaderComponent()->setMetaInformation($pageRecord);
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
         $cshButton = $buttonBar->makeHelpButton()
             ->setModuleName('pagetree_new')
             ->setFieldName('pagetree_new');
-        $viewButton = $buttonBar->makeLinkButton()
-            ->setTitle($this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.showPage'))
-            ->setIcon($iconFactory->getIcon('actions-view-page', Icon::SIZE_SMALL))
-            ->setHref('#');
-
         $previewDataAttributes = PreviewUriBuilder::create($pageUid)
             ->withRootLine(BackendUtility::BEgetRootLine($pageUid))
             ->buildDispatcherDataAttributes();
-        $viewButton->setDataAttributes($previewDataAttributes ?? []);
+        $viewButton = $buttonBar->makeLinkButton()
+            ->setDataAttributes($previewDataAttributes ?? [])
+            ->setTitle($this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.showPage'))
+            ->setIcon($this->iconFactory->getIcon('actions-view-page', Icon::SIZE_SMALL))
+            ->setHref('#');
+        $buttonBar->addButton($cshButton)->addButton($viewButton);
 
         // Main view setup
-        /** @var StandaloneView $view */
         $view = GeneralUtility::makeInstance(StandaloneView::class);
         $view->setTemplatePathAndFilename(GeneralUtility::getFileAbsFileName(
             'EXT:wizard_crpagetree/Resources/Private/Templates/Page/NewPagetree.html'
         ));
 
-        $calculatedPermissions = $backendUser->calcPerms($pageRecord);
-        $canCreateNew = $backendUser->isAdmin() || $calculatedPermissions & Permission::PAGE_NEW;
+        $calculatedPermissions = new Permission($backendUser->calcPerms($pageRecord));
+        $canCreateNew = $backendUser->isAdmin() || $calculatedPermissions->createPagePermissionIsGranted();
 
         $view->assign('canCreateNew', $canCreateNew);
         $view->assign('maxTitleLength', $backendUser->uc['titleLen'] ?? 20);
@@ -257,7 +260,7 @@ class NewPagetreeController
                 )
             )
             ->orderBy('sorting')
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
     }
 

@@ -6,6 +6,12 @@
 Change log
 ==========
 
+Version 6.0.1
+-------------
+
+* Removed result display to avoid PHP warning from core (unmaintained class)
+
+
 Version 6.0.0
 -------------
 
