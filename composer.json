@@ -21,11 +21,8 @@
 		"mass editing"
 	],
 	"require": {
-		"php": "~8.1 || ~8.2",
-		"typo3/cms-backend": "^11.5 | ^12.1"
-	},
-	"replace": {
-		"typo3-ter/wizard_crpagetree": "self.version"
+		"php": "^8.1",
+		"typo3/cms-backend": "^11.5 || ^12.4"
 	},
 	"autoload": {
 		"psr-4": {
@@ -37,7 +34,7 @@
 			"extension-key": "wizard_crpagetree"
 		},
 		"branch-alias": {
-			"dev-master": "6.0.x-dev"
+			"dev-master": "6.x-dev"
 		}
 	}
 }
