@@ -8,14 +8,12 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\PreviewUriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
-use TYPO3\CMS\Backend\Tree\View\ElementBrowserPageTreeView;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
@@ -24,7 +22,6 @@ use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
-use TYPO3\CMS\Recordlist\Browser\DatabaseBrowser;
 
 /**
  * "New page tree" controller
@@ -123,16 +120,6 @@ class NewPagetreeController
             } else {
                 $hasNewPagesData = false;
             }
-
-            // Display result:
-            $tree = GeneralUtility::makeInstance(ElementBrowserPageTreeView::class);
-            $tree->init(' AND pages.doktype < ' . PageRepository::DOKTYPE_RECYCLER . ' AND pages.hidden = "0"');
-            $tree->setLinkParameterProvider(GeneralUtility::makeInstance(DatabaseBrowser::class));
-            $tree->thisScript = '#';
-
-            $tree->getTree($pageUid);
-
-            $view->assign('createdPages', $tree->printTree());
 
             $view->assign('hasNewPagesData', $hasNewPagesData);
         }
