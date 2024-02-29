@@ -5,13 +5,16 @@
  * @exports TYPO3/CMS/WizardCrpagetree/ContextMenuActions
  */
 
-define(["require", "exports", "jquery"], (function (e, t, a) {
+define(["require", "exports", "jquery"], (function (e, t, $) {
 	"use strict";
 	return new class {
 		pagesNewTree(e, t) {
-			const n = "pages" === e ? t : a.default(this).data("page-uid");
-			"pages" === e ? top.TYPO3.Backend.ContentContainer.setUrl(top.TYPO3.settings.WizardCrpagetree.wizardCrpagetreeUrl + "&id=" + n) : '';
-		}
+      const moduleUrl = $(this).data('page-new-tree-url');
+      const n = "pages" === e ? t : $(this).data("page-uid");
+      const retUrl = encodeURIComponent(top.list_frame.document.location.pathname + top.list_frame.document.location.search);
+      top.TYPO3.Backend.ContentContainer.setUrl(
+        moduleUrl + '&returnUrl=' + retUrl + "&id=" + n,
+      );
+    }
 	}
 }));
-
