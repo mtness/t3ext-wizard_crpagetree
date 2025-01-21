@@ -22,7 +22,7 @@
 	],
 	"require": {
 		"php": "^8.1",
-		"typo3/cms-backend": "^11.5 || ^12.4"
+		"typo3/cms-backend": "^12.4 || ^13.4"
 	},
 	"autoload": {
 		"psr-4": {
@@ -34,7 +34,7 @@
 			"extension-key": "wizard_crpagetree"
 		},
 		"branch-alias": {
-			"dev-master": "6.x-dev"
+			"dev-master": "7.x-dev"
 		}
 	}
 }
