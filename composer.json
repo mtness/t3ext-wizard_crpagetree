@@ -21,7 +21,7 @@
 		"mass editing"
 	],
 	"require": {
-		"php": "^8.1",
+		"php": "^8.4",
 		"typo3/cms-backend": "^12.4 || ^13.4"
 	},
 	"autoload": {
